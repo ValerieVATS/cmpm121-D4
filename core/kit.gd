@@ -19,14 +19,9 @@ static func quarter_turn(direction: Vector2i) -> Vector2i:
 	return Vector2i(direction.y, -direction.x)
 
 
-## The grid step from one cell to its neighbor, even across the wrap-around edge.
+## The grid step from one cell to its neighbor (the snake never wraps).
 static func step(from: Vector2i, to: Vector2i) -> Vector2i:
-	var d := to - from
-	if abs(d.x) > 1:
-		d.x = -signi(d.x)
-	if abs(d.y) > 1:
-		d.y = -signi(d.y)
-	return d
+	return to - from
 
 
 ## How many quarter turns make the piece's openings face the given sides.

@@ -96,6 +96,8 @@ def make_materials():
         "s": pbr_material("Stone", "#9e9883", roughness=0.85),
         "t": pbr_material("Moss", "#6f8558", roughness=0.9),
         "w": pbr_material("Brick", "#6b4d3d", roughness=0.9),
+        "b": pbr_material("Berry", "#cf275e", roughness=0.35),
+        "l": pbr_material("Berry leaf", "#65b33b", roughness=0.8),
     })
 
 
@@ -192,6 +194,25 @@ def build_wall(bm):
         """] * 3)
 
 
+def build_berry(bm):
+    voxels(bm, ["""
+        .bb.
+        bbbb
+        bbbb
+        .bb.
+        """, """
+        .bb.
+        bbbb
+        bbbb
+        .bb.
+        """, """
+        ....
+        .ll.
+        .ll.
+        ....
+        """])
+
+
 PIECES = {  # the dragon kit; the game finds each mesh by these names
     "head": build_head,
     "straight": build_straight,
@@ -201,6 +222,7 @@ PIECES = {  # the dragon kit; the game finds each mesh by these names
 TILES = {  # one entry per kind in core/board.gd's TILES; a new kind is one builder and one line
     "floor": build_floor,
     "wall": build_wall,
+    "berry": build_berry,
 }
 
 

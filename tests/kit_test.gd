@@ -23,5 +23,5 @@ func test_corner_gets_the_turn_piece() -> void:
 	assert_true(Vector2i.UP in sides and Vector2i.LEFT in sides)
 
 
-func test_neighbors_across_the_wrap_are_adjacent() -> void:
-	assert_eq(Kit.step(Vector2i(9, 3), Vector2i(0, 3)), Vector2i.RIGHT)
+func test_step_does_not_wrap_across_the_board() -> void:
+	assert_eq(Kit.step(Vector2i(9, 3), Vector2i(0, 3)), Vector2i(-9, 0))

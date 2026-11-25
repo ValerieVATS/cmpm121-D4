@@ -5,6 +5,10 @@ extends SceneTree
 
 
 func _initialize() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
 	var failed := 0
 	var passed := 0
 	for file in DirAccess.get_files_at("res://tests"):

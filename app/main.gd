@@ -2,7 +2,7 @@
 ## It never decides rules: those live in core/session.gd.
 extends Node3D
 
-const GRID := Vector2i(48, 48)  # your call: bigger grids make the dragon feel finer
+const GRID := Vector2i(20, 20)
 const TICK_SECONDS := 0.1
 const CAMERA_OFFSET := Vector3(0, 11, 7.5)  # above and behind the head
 const DIRECTIONS := {
@@ -15,21 +15,40 @@ const DIRECTIONS := {
 var session := Session.new(GRID)
 var meshes := {}  # kit piece name -> Mesh, shared by everything that shows it (Flyweight)
 var segments: Array[MeshInstance3D] = []
+var food_view := MeshInstance3D.new()
 var camera := Camera3D.new()
+var score_label := Label.new()
+var message_label := Label.new()
 var _clock := 0.0
 
 
 func _ready() -> void:
 	meshes = Stage.load_kit()
 	_build_stage()
+	add_child(food_view)
+	food_view.mesh = meshes["berry"]
+	_setup_hud()
+	_connect_session()
 	_draw_dragon()
+	_draw_food()
+	_update_hud()
 
 
 ## Input arrives as events, so even a tap shorter than one frame is never missed.
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and session.over:
+		if event.keycode == KEY_R or event.keycode == KEY_SPACE:
+			session = Session.new(GRID)
+			_clock = 0.0
+			_connect_session()
+			_draw_dragon()
+			_draw_food()
+			_update_hud()
+			return
 	for action in DIRECTIONS:
 		if event.is_action_pressed(action):
-			session.dragon.turn(DIRECTIONS[action])
+			session.turn(DIRECTIONS[action])
+			_update_hud()
 
 
 func _process(delta: float) -> void:
@@ -38,7 +57,51 @@ func _process(delta: float) -> void:
 		_clock -= TICK_SECONDS
 		session.tick()
 		_draw_dragon()
+		_draw_food()
 	_follow(delta)
+
+
+func _connect_session() -> void:
+	session.ate.connect(_on_ate)
+	session.crashed.connect(_on_crashed)
+
+
+func _setup_hud() -> void:
+	var hud := CanvasLayer.new()
+	add_child(hud)
+	for label in [score_label, message_label]:
+		label.add_theme_font_size_override("font_size", 24)
+		label.add_theme_color_override("font_color", Color.WHITE)
+		label.add_theme_color_override("font_outline_color", Color.BLACK)
+		label.add_theme_constant_override("outline_size", 5)
+		hud.add_child(label)
+	score_label.position = Vector2(18, 14)
+	message_label.position = Vector2(18, 46)
+
+
+func _update_hud() -> void:
+	score_label.text = "Berries: %d" % session.score
+	if session.over:
+		message_label.text = "Game over! Score: %d  -  R or Space to restart" % session.score
+	elif session.started:
+		message_label.text = "Collect berries. Avoid walls and your body."
+	else:
+		message_label.text = "Press an arrow key to begin."
+
+
+func _on_ate(_score: int) -> void:
+	_update_hud()
+	_draw_food()
+
+
+func _on_crashed(_score: int) -> void:
+	_update_hud()
+
+
+func _draw_food() -> void:
+	food_view.visible = session.food != Vector2i(-1, -1)
+	if food_view.visible:
+		food_view.position = _center(session.food)
 
 
 ## Sky, light, and tiles live in app/stage.gd; the camera follows the head.

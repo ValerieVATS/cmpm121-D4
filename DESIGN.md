@@ -5,8 +5,9 @@ to learn where your project is headed. Replace each _italic prompt_.
 
 ## Target
 
-_One or two sentences: what is this creature, what does it eat, where does it live,
-and what should playing feel like?_
+A little garden snake collects berries in a grassy field. Each berry adds one body
+segment; moving through the 20x20 garden should feel cozy until the growing snake
+has to navigate around itself and the walls.
 
 ## Menu choices
 
@@ -29,12 +30,18 @@ already here from the starter; keep them accurate as you change things.
 | tick | one step of the rules; the dragon moves one cell | `Session.tick()`, `Dragon.tick()` |
 | tile kind | what a cell is made of, such as `floor` or `wall` | `Board.TILES`, `TILES` in `tools/build_art.py` |
 | piece | one model in the kit: head, straight, turn, tail | `Kit.Piece`, `PIECES` in `tools/build_art.py` |
-| _word_ | _meaning_ | _where_ |
+| berry | food on a free garden cell; eating it adds one segment and one point | `Session.food`, `build_berry()` in `tools/build_art.py` |
+| score | number of berries eaten in this run | `Session.score`, shown by `app/main.gd` |
+| started | the first arrow key has been pressed; ticks now advance the snake | `Session.started` |
+| crash | the head would enter a wall or an occupied body cell | `Session.tick()`, reported by `crashed` |
+| signal | an event from the rules that the adapter listens to | `Session.ate`, `Session.crashed` |
 
 ## Where things live
 
-_Where do the rules live, where does drawing happen, and how does an event get from
-one to the other in your project?_
+`core/` owns grid movement, food placement, growth, collisions, and score without
+depending on scene nodes. `app/` owns input, the clock, the camera, meshes, and HUD:
+arrow keys call `Session.turn()`, each clock tick calls `Session.tick()`, and its
+`ate` / `crashed` signals update the display.
 
 ## Adding a tile kind
 
